@@ -16,9 +16,67 @@ fn main() {
         Err(why) => panic!("Couldn't open {}: {}", filename, why.description()),
         Ok(data) => data,
     };
-    
-    println!("{}", data);
 
+    let mut words = data.split_whitespace();
+    let ndtot: usize = match words.next() {
+        Some(item) => item.parse().unwrap(),
+        None => panic!("Error, {} empty.", filename),
+    };
+
+    let mut x = vec![0.; ndtot+1];
+    let mut y = vec![0.; ndtot+1];
+    let mut x_mid = vec![0.; ndtot];
+    let mut y_mid = vec![0.; ndtot];
+    let mut costhe = vec![0.; ndtot];
+    let mut sinthe = vec![0.; ndtot];
+
+    for i in 0..ndtot+1 {
+        x[i] = match words.next() {
+            Some(item) => item.parse().unwrap(),
+            None => panic!("Error, end of file reached at {} before x got to {} in {}.", i, ndtot, filename),
+        };
+    }
+    for i in 0..ndtot+1 {
+        y[i] = match words.next() {
+            Some(item) => item.parse().unwrap(),
+            None => panic!("Error, end of file reached at {} before y got to {} in {}.", i, ndtot, filename),
+        };
+    }
+
+    for i in 0..ndtot {
+        x_mid[i] = 0.5 * (x[i] + x[i+1]);
+        y_mid[i] = 0.5 * (y[i] + y[i+1]);
+        let dx: f64 = x[i+1] - x[i];
+        let dy: f64 = y[i+1] - y[i]; // sqrt not found if the type isn't specified on those...
+        let dist = (dx*dx + dy*dy).sqrt();
+
+        costhe[i] = dy/dist;
+        sinthe[i] = dx/dist;
+    }
+
+    let alpha: f64 = match words.next() {
+        Some(item) => item.parse().unwrap(),
+        None => panic!("Error, end of file reached before alpha in {}.", filename),
+    };
+    println!(" SOLUTION AT ALPHA = {}\n", alpha);
+
+    let cos_alpha  = alpha.to_radians().cos();
+    let sin_alpha  = alpha.to_radians().sin();
+
+    let bod = BOD {
+                ndtot,
+                x,
+                y,
+                x_mid,
+                y_mid,
+                costhe,
+                sinthe,
+                };
+
+    let mut cof = coef(sin_alpha, cos_alpha, &bod);
+    gauss(1, &mut cof);
+    let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
+    clcm(sin_alpha, cos_alpha, &bod, &cpd);
 }
 
 struct BOD {
