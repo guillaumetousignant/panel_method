@@ -23,7 +23,7 @@ struct CPD {
     cp: Vec<f64>,
 }
 
-fn coef(sin_alpha: f64, cos_alpha: f64, bod: &mut BOD) -> COF{
+fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
     let n = bod.ndtot + 1;
     let mut a = vec![0.; n];
     let mut bv = vec![0.; n];
@@ -96,7 +96,7 @@ fn gauss(m: usize, cof: &mut COF) {
 
 }
 
-fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &mut BOD, cof: &mut COF) -> CPD {
+fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let q = &cof.b[0..bod.ndtot];
     let gamma = cof.b[cof.n-1];
     let mut cp = vec![0.; bod.ndtot];
@@ -137,4 +137,8 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &mut BOD, cof: &mut COF) -> CPD {
         ue, 
         cp
     }
+}
+
+fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) {
+    
 }
