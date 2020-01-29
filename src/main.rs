@@ -79,7 +79,7 @@ fn main() {
 
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
     for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // NOT GOOD
+        println!("{} {}", i, cof.b[i]); // GOOD
     }
     gauss(0, &mut cof);
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
