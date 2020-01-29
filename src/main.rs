@@ -50,8 +50,8 @@ fn main() {
         let dy: f64 = y[i+1] - y[i]; // sqrt not found if the type isn't specified on those...
         let dist = (dx*dx + dy*dy).sqrt();
 
-        costhe[i] = dy/dist;
-        sinthe[i] = dx/dist;
+        sinthe[i] = dy/dist;
+        costhe[i] = dx/dist;
     }
 
     let alpha: f64 = match words.next() {
