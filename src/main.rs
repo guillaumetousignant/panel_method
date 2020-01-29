@@ -108,7 +108,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
         a[(n-1)*n + j] = 0.;
     }
     for i in 0..n {
-        a[i*n + n] = 0.;
+        a[i*n + n-1] = 0.;
         for j in 0..n {
             let (flog, ftan) = match j == i {
                 true => (0., std::f64::consts::PI),
@@ -125,16 +125,16 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
             let stimtj  = bod.sinthe[i]*bod.costhe[j] - bod.costhe[i]*bod.sinthe[j];
             a[i*n + j] = 0.5/std::f64::consts::PI * (ftan*ctimtj + flog*stimtj);
             let b = 0.5/std::f64::consts::PI * (flog*ctimtj - ftan*stimtj);
-            a[i*n + n] += b;
+            a[i*n + n-1] += b;
 
             if (i < 1) || (i >= n-1) {
                 a[i*n + j] -= b;
-                a[(n-1)*n + n] += a[i*n + j];
+                a[(n-1)*n + n-1] += a[i*n + j];
             }   
         }
         bv[i] = bod.sinthe[i]*cos_alpha - bod.costhe[i]*sin_alpha;
     }
-    bv[n] = -(bod.costhe[0] + bod.costhe[bod.ndtot])*cos_alpha - (bod.sinthe[0] + bod.sinthe[bod.ndtot])*sin_alpha;
+    bv[n-1] = -(bod.costhe[0] + bod.costhe[bod.ndtot-1])*cos_alpha - (bod.sinthe[0] + bod.sinthe[bod.ndtot-1])*sin_alpha;
     
     COF {
         a, 
@@ -161,7 +161,7 @@ fn gauss(m: usize, cof: &mut COF) {
     }
 
     for k in 0..m {
-        cof.b[(n-1)*n + k] /= cof.a[n*n + n];
+        cof.b[(n-1)*n + k] /= cof.a[(n-1)*n + n-1];
         for i in (0..n-1).rev() {
             let ip = i + 1;
             for j in ip..n {
