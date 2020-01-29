@@ -58,7 +58,7 @@ fn main() {
         Some(item) => item.parse().unwrap(),
         None => panic!("Error, end of file reached before alpha in {}.", filename),
     };
-    println!(" SOLUTION AT ALPHA = {}\n", alpha);
+    println!(" SOLUTION AT ALPHA = {:>10.5}\n", alpha);
 
     let cos_alpha  = alpha.to_radians().cos();
     let sin_alpha  = alpha.to_radians().sin();
@@ -74,7 +74,7 @@ fn main() {
                 };
 
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
-    gauss(1, &mut cof);
+    gauss(0, &mut cof);
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
 }
@@ -107,9 +107,9 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
     for j in 0..n {
         a[(n-1)*n + j] = 0.;
     }
-    for i in 0..n {
+    for i in 0..bod.ndtot {
         a[i*n + n-1] = 0.;
-        for j in 0..n {
+        for j in 0..bod.ndtot {
             let (flog, ftan) = match j == i {
                 true => (0., std::f64::consts::PI),
                 false => {
@@ -127,7 +127,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
             let b = 0.5/std::f64::consts::PI * (flog*ctimtj - ftan*stimtj);
             a[i*n + n-1] += b;
 
-            if (i < 1) || (i >= n-1) {
+            if (i < 1) || (i >= bod.ndtot-1) {
                 a[i*n + j] -= b;
                 a[(n-1)*n + n-1] += a[i*n + j];
             }   
@@ -202,7 +202,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
         }
         cp[i]   = 1. - v_tan*v_tan;
         ue[i]   = v_tan;
-        println!("{index} {xmid} {ymid} {cp} {ue}",
+        println!("{index:>5} {xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",
                 index = i,
                 xmid = bod.x_mid[i],
                 ymid = bod.y_mid[i],
@@ -230,7 +230,7 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) {
     }
 
     let cl = cfy*cos_alpha - cfx*sin_alpha;
-    println!("\n\n    CL = {CL}    CM = {CM}",
+    println!("\n\n    CL = {CL:>9.5}    CM = {CM:>9.5}",
             CL = cl,
             CM = cm);
 }
