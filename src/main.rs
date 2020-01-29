@@ -86,9 +86,9 @@ fn main() {
     /*for i in 0..cof.b.len(){
         println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
     }*/
-    for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // 
-    }
+    /*for i in 0..cof.b.len(){
+        println!("{} {}", i, cof.b[i]); // NOT GOOD
+    }*/
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
 }
@@ -167,6 +167,7 @@ fn gauss(m: usize, cof: &mut COF) {
         let kp = k + 1;
         for i in kp..n {
             let r = cof.a[i*n + k]/cof.a[k*n + k];
+            //println!("{},{} {}", k, i, r); // GOOD
             for j in kp..n {
                 cof.a[i*n + j] -= r*cof.a[k*n + j];
             }
@@ -174,6 +175,10 @@ fn gauss(m: usize, cof: &mut COF) {
                 cof.b[i*n + j] -= r*cof.b[k*n + j];
             }
         }
+    }
+
+    for i in 0..cof.b.len(){
+        println!("{} {}", i, cof.b[i]); // NOT GOOD
     }
 
     for k in 0..m {
