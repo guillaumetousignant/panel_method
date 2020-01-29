@@ -83,8 +83,11 @@ fn main() {
         println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
     }*/
     gauss(0, &mut cof);
+    /*for i in 0..cof.b.len(){
+        println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
+    }*/
     for i in 0..cof.b.len(){
-        println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // 
+        println!("{} {}", i, cof.b[i]); // 
     }
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
