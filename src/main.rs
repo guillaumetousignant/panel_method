@@ -54,6 +54,10 @@ fn main() {
         costhe[i] = dx/dist;
     }
 
+    //for i in 0..ndtot{
+    //    println!("{} {}", costhe[i], sinthe[i]); GOOD
+    //}
+
     let alpha: f64 = match words.next() {
         Some(item) => item.parse().unwrap(),
         None => panic!("Error, end of file reached before alpha in {}.", filename),
@@ -74,9 +78,9 @@ fn main() {
                 };
 
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
-    //for i in 0..cof.b.len(){
-    //    println!("{}", cof.b[i]); NOT GOOD
-    //}
+    for i in 0..cof.b.len(){
+        println!("{} {}", i, cof.b[i]); // NOT GOOD
+    }
     gauss(0, &mut cof);
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
