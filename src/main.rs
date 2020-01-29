@@ -102,10 +102,10 @@ struct CPD {
 
 fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
     let n = bod.ndtot + 1;
-    let mut a = vec![0.; n];
+    let mut a = vec![0.; n*n];
     let mut bv = vec![0.; n];
     for j in 0..n {
-        a[n*n + j] = 0.;
+        a[(n-1)*n + j] = 0.;
     }
     for i in 0..n {
         a[i*n + n] = 0.;
@@ -129,7 +129,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
 
             if (i < 1) || (i >= n-1) {
                 a[i*n + j] -= b;
-                a[n*n + n] += a[i*n + j];
+                a[(n-1)*n + n] += a[i*n + j];
             }   
         }
         bv[i] = bod.sinthe[i]*cos_alpha - bod.costhe[i]*sin_alpha;
@@ -161,7 +161,7 @@ fn gauss(m: usize, cof: &mut COF) {
     }
 
     for k in 0..m {
-        cof.b[n*n + k] /= cof.a[n*n + n];
+        cof.b[(n-1)*n + k] /= cof.a[n*n + n];
         for i in (0..n-1).rev() {
             let ip = i + 1;
             for j in ip..n {
