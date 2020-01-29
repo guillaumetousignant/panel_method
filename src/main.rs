@@ -1,5 +1,5 @@
 fn main() {
-    println!("Hello, world!");
+    println!("Enter input file name (include extension name)");
 }
 
 struct BOD {
@@ -102,7 +102,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let mut cp = vec![0.; bod.ndtot];
     let mut ue = vec![0.; bod.ndtot];
 
-    println!("    j    X(j)      Y(j)      CP(j)      UE(j)");
+    println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
     for i in 0..bod.ndtot {
         let mut v_tan = cos_alpha*bod.costhe[i] + sin_alpha*bod.sinthe[i];
         for j in 0..bod.ndtot {
@@ -140,5 +140,20 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
 }
 
 fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) {
-    
+    let mut cfx = 0.;
+    let mut cfy = 0.;
+    let mut cm = 0.;
+
+    for i in 0..bod.ndtot {
+        let dx = bod.x[i+1] - bod.x[i];
+        let dy = bod.y[i+1] - bod.y[i];
+        cfx += cpd.cp[i]*dy;
+        cfy -= cpd.cp[i]*dx;
+        cm += cpd.cp[i]*(dx*bod.x_mid[i] + dy*bod.y_mid[i]);
+    }
+
+    let cl = cfy*cos_alpha - cfx*sin_alpha;
+    println!("\n\n    CL = {CL}    CM = {CM}",
+            CL = cl,
+            CM = cm);
 }
