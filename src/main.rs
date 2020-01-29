@@ -1,5 +1,23 @@
+use std::error::Error;
+use std::fs;
+
 fn main() {
-    let filename = get_input("Enter input file name (include extension name)");
+    let args: Vec<String> = std::env::args().collect();
+    println!("{}", args.len());
+    println!("{}", args[0]);
+    let filename = match args.len() > 1 {
+        true => args[1].clone(),
+        false => get_input("Enter input file name (include extension name)"),
+    };
+    
+    println!("Input file is  {}", filename);
+
+    let data = match fs::read_to_string(&filename) {
+        Err(why) => panic!("Couldn't open {}: {}", filename, why.description()),
+        Ok(data) => data,
+    };
+    
+    println!("{}", data);
 
 }
 
