@@ -143,7 +143,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
             a[i*n + n-1] += b;
 
             if (i < 1) || (i >= bod.ndtot-1) {
-                a[i*n + j] -= b;
+                a[(n-1)*n + j] -= b;
                 a[(n-1)*n + n-1] += a[i*n + j];
             }   
         }
