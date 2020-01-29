@@ -3,8 +3,6 @@ use std::fs;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    println!("{}", args.len());
-    println!("{}", args[0]);
     let filename = match args.len() > 1 {
         true => args[1].clone(),
         false => get_input("Enter input file name (include extension name)"),
