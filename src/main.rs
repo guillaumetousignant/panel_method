@@ -74,6 +74,9 @@ fn main() {
                 };
 
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
+    //for i in 0..cof.b.len(){
+    //    println!("{}", cof.b[i]); NOT GOOD
+    //}
     gauss(0, &mut cof);
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
@@ -120,6 +123,8 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
                     (0.5 * ((dxjp*dxjp + dyjp*dyjp)/(dxj*dxj + dyj*dyj)).ln(), (dyjp*dxj - dxjp*dyj).atan2(dxjp*dxj + dyjp*dyj))
                 },
             };
+
+            //println!("{} {}", flog, ftan); GOOD
 
             let ctimtj = bod.costhe[i]*bod.costhe[j] + bod.sinthe[i]*bod.sinthe[j];
             let stimtj  = bod.sinthe[i]*bod.costhe[j] - bod.costhe[i]*bod.sinthe[j];
