@@ -163,10 +163,6 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
 fn gauss(m: usize, cof: &mut COF) {
     let n = cof.n;
 
-    /*for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // GOOD
-    }*/
-
     for k in 0..n-1 {
         let kp = k + 1;
         for i in kp..n {
@@ -181,9 +177,6 @@ fn gauss(m: usize, cof: &mut COF) {
         }
     }
 
-    for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // NOT GOOD
-    }
 
     for k in 0..m {
         cof.b[(n-1)*m + k] /= cof.a[(n-1)*n + n-1];
@@ -195,7 +188,6 @@ fn gauss(m: usize, cof: &mut COF) {
             cof.b[i*m + k] /= cof.a[i*n + i];
         }
     }
-
 }
 
 fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
