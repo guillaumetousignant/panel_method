@@ -200,7 +200,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
             let b = 0.5/std::f64::consts::PI * (flog * ctimtj - ftan * stimtj);
             //println!("{},{}  {}", i, j, aa); // GOOD
             //println!("{},{}  {}", i, j, b); // GOOD
-            v_tan -= b*q[j] + gamma*aa;
+            v_tan -= b*q[j] - gamma*aa;
         }
         cp[i]   = 1. - v_tan*v_tan;
         ue[i]   = v_tan;
