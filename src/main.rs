@@ -52,10 +52,6 @@ fn main() {
         costhe[i] = dx/dist;
     }
 
-    //for i in 0..ndtot{
-    //    println!("{} {}", costhe[i], sinthe[i]); GOOD
-    //}
-
     let alpha: f64 = match words.next() {
         Some(item) => item.parse().unwrap(),
         None => panic!("Error, end of file reached before alpha in {}.", filename),
@@ -76,19 +72,7 @@ fn main() {
                 };
 
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
-    /*for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // GOOD
-    }*/
-    /*for i in 0..cof.b.len(){
-        println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
-    }*/
     gauss(1, &mut cof);
-    /*for i in 0..cof.b.len(){
-        println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
-    }*/
-    /*for i in 0..cof.b.len(){
-        println!("{} {}", i, cof.b[i]); // NOT GOOD
-    }*/
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     clcm(sin_alpha, cos_alpha, &bod, &cpd);
 }
@@ -135,8 +119,6 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
                 },
             };
 
-            //println!("{} {}", flog, ftan); GOOD
-
             let ctimtj = bod.costhe[i]*bod.costhe[j] + bod.sinthe[i]*bod.sinthe[j];
             let stimtj  = bod.sinthe[i]*bod.costhe[j] - bod.costhe[i]*bod.sinthe[j];
             a[i*n + j] = 0.5/std::f64::consts::PI * (ftan*ctimtj + flog*stimtj);
@@ -167,7 +149,6 @@ fn gauss(m: usize, cof: &mut COF) {
         let kp = k + 1;
         for i in kp..n {
             let r = cof.a[i*n + k]/cof.a[k*n + k];
-            //println!("{},{} {}", k, i, r); // GOOD
             for j in kp..n {
                 cof.a[i*n + j] -= r*cof.a[k*n + j];
             }
