@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs;
 use std::time::Instant;
+use gnuplot::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -24,6 +25,7 @@ fn main() {
 
     println!("Time elapsed: {}ms.", now.elapsed().as_millis());
     print(alpha, &bod, &cpd, cl, cm);
+    plot(&cpd);
 }
 
 struct BOD {
@@ -260,4 +262,19 @@ fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
     println!("\n\n    CL = {CL:>9.5}    CM = {CM:>9.5}",
             CL = cl,
             CM = cm);
+}
+
+fn plot(cpd: &CPD) {
+    let mut fg = Figure::new();
+    fg.axes2d()
+        .set_title("A plot", &[])
+        .set_legend(Graph(0.5), Graph(0.9), &[], &[])
+        .set_x_label("x", &[])
+        .set_y_label("y^2", &[])
+        .lines(
+            &[-3., -2., -1., 0., 1., 2., 3.],
+            &[9., 4., 1., 0., 1., 4., 9.],
+            &[Caption("Parabola")],
+        );
+    fg.show().unwrap();
 }
