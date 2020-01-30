@@ -161,7 +161,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
 
 // Assumes a is of size n*n and b is of size n
 fn gauss(m: usize, cof: &mut COF) {
-    let n = cof.b.len();
+    let n = cof.n;
 
     /*for i in 0..cof.b.len(){
         println!("{} {}", i, cof.b[i]); // GOOD
@@ -176,7 +176,7 @@ fn gauss(m: usize, cof: &mut COF) {
                 cof.a[i*n + j] -= r*cof.a[k*n + j];
             }
             for j in 0..m {
-                cof.b[i*n + j] -= r*cof.b[k*n + j];
+                cof.b[i*m + j] -= r*cof.b[k*m + j];
             }
         }
     }
@@ -186,13 +186,13 @@ fn gauss(m: usize, cof: &mut COF) {
     }
 
     for k in 0..m {
-        cof.b[(n-1)*n + k] /= cof.a[(n-1)*n + n-1];
+        cof.b[(n-1)*m + k] /= cof.a[(n-1)*n + n-1];
         for i in (0..n-1).rev() {
             let ip = i + 1;
             for j in ip..n {
-                cof.b[i*n + k] -= cof.a[i*n + j] * cof.b[j*n + k];
+                cof.b[i*m + k] -= cof.a[i*n + j] * cof.b[j*m + k];
             }
-            cof.b[i*n + k] /= cof.a[i*n + i];
+            cof.b[i*m + k] /= cof.a[i*n + i];
         }
     }
 
