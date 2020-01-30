@@ -25,7 +25,7 @@ fn main() {
 
     println!("Time elapsed: {}ms.", now.elapsed().as_millis());
     print(alpha, &bod, &cpd, cl, cm);
-    plot(&cpd);
+    plot(&bod, &cpd);
 }
 
 struct BOD {
@@ -264,17 +264,17 @@ fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
             CM = cm);
 }
 
-fn plot(cpd: &CPD) {
+fn plot(bod: &BOD, cpd: &CPD) {
     let mut fg = Figure::new();
     fg.axes2d()
-        .set_title("A plot", &[])
+        .set_title("Cp with x", &[])
         .set_legend(Graph(0.5), Graph(0.9), &[], &[])
         .set_x_label("x", &[])
-        .set_y_label("y^2", &[])
+        .set_y_label("Cp", &[])
         .lines(
+            &bod.x_mid,
             &cpd.cp,
-            &cpd.ue,
-            &[Caption("Parabola")],
+            &[Caption("Cp")],
         );
     fg.show().unwrap();
 }
