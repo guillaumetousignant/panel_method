@@ -56,7 +56,6 @@ fn main() {
         Some(item) => item.parse().unwrap(),
         None => panic!("Error, end of file reached before alpha in {}.", filename),
     };
-    println!("\n\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
 
     let cos_alpha  = alpha.to_radians().cos();
     let sin_alpha  = alpha.to_radians().sin();
@@ -74,7 +73,9 @@ fn main() {
     let mut cof = coef(sin_alpha, cos_alpha, &bod);
     gauss(1, &mut cof);
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
-    clcm(sin_alpha, cos_alpha, &bod, &cpd);
+    let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
+
+    print(alpha, &bod, &cpd, cl, cm);
 }
 
 struct BOD {
@@ -177,7 +178,6 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let mut cp = vec![0.; bod.ndtot];
     let mut ue = vec![0.; bod.ndtot];
 
-    println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
     for i in 0..bod.ndtot {
         let mut v_tan = cos_alpha*bod.costhe[i] + sin_alpha*bod.sinthe[i];
         for j in 0..bod.ndtot {
@@ -200,12 +200,6 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
         }
         cp[i]   = 1. - v_tan*v_tan;
         ue[i]   = v_tan;
-        println!("{index:>5} {xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",
-                index = i,
-                xmid = bod.x_mid[i],
-                ymid = bod.y_mid[i],
-                cp = cp[i],
-                ue = ue[i]);
     }
 
     CPD {
@@ -214,7 +208,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     }
 }
 
-fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) {
+fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     let mut cfx = 0.;
     let mut cfy = 0.;
     let mut cm = 0.;
@@ -228,9 +222,8 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) {
     }
 
     let cl = cfy*cos_alpha - cfx*sin_alpha;
-    println!("\n\n    CL = {CL:>9.5}    CM = {CM:>9.5}",
-            CL = cl,
-            CM = cm);
+    
+    (cl, cm)
 }
 
 fn get_input(prompt: &str) -> String{
@@ -241,4 +234,22 @@ fn get_input(prompt: &str) -> String{
         Err(_no_updates_is_fine) => {},
     }
     input.trim().to_string()
+}
+
+fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
+    println!("\n\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
+    println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
+
+    for i in 0..bod.ndtot {
+        println!("{index:>5} {xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",
+                index = i,
+                xmid = bod.x_mid[i],
+                ymid = bod.y_mid[i],
+                cp = cpd.cp[i],
+                ue = cpd.ue[i]);
+    }
+
+    println!("\n\n    CL = {CL:>9.5}    CM = {CM:>9.5}",
+            CL = cl,
+            CM = cm);
 }
