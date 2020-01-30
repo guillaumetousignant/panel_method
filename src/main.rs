@@ -22,7 +22,7 @@ fn main() {
     let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
     let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
 
-    println!("Time elapsed: {} seconds.", now.elapsed().as_secs());
+    println!("Time elapsed: {}ms.", now.elapsed().as_millis());
     print(alpha, &bod, &cpd, cl, cm);
 }
 
