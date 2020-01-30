@@ -163,6 +163,10 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
 fn gauss(m: usize, cof: &mut COF) {
     let n = cof.b.len();
 
+    /*for i in 0..cof.b.len(){
+        println!("{} {}", i, cof.b[i]); // GOOD
+    }*/
+
     for k in 0..n-1 {
         let kp = k + 1;
         for i in kp..n {
