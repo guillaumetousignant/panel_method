@@ -56,7 +56,7 @@ fn main() {
         Some(item) => item.parse().unwrap(),
         None => panic!("Error, end of file reached before alpha in {}.", filename),
     };
-    println!(" SOLUTION AT ALPHA = {:>10.5}\n", alpha);
+    println!("\n\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
 
     let cos_alpha  = alpha.to_radians().cos();
     let sin_alpha  = alpha.to_radians().sin();
