@@ -272,8 +272,8 @@ fn plot(cpd: &CPD) {
         .set_x_label("x", &[])
         .set_y_label("y^2", &[])
         .lines(
-            &[-3., -2., -1., 0., 1., 2., 3.],
-            &[9., 4., 1., 0., 1., 4., 9.],
+            &cpd.cp,
+            &cpd.ue,
             &[Caption("Parabola")],
         );
     fg.show().unwrap();
