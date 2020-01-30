@@ -176,10 +176,12 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let gamma = cof.b[cof.n-1];
     let mut cp = vec![0.; bod.ndtot];
     let mut ue = vec![0.; bod.ndtot];
+    //println!("gamma: {}", gamma); GOOD
 
     println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
     for i in 0..bod.ndtot {
         let mut v_tan = cos_alpha*bod.costhe[i] + sin_alpha*bod.sinthe[i];
+        //println!("{}  {}", i, v_tan); // GOOD
         for j in 0..bod.ndtot {
             let (flog, ftan) = match j == i {
                 true => (0., std::f64::consts::PI),
