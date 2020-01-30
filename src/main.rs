@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -7,9 +8,46 @@ fn main() {
         true => args[1].clone(),
         false => get_input("Enter input file name (include extension name)"),
     };
-    
-    println!("Input file is  {}", filename);
 
+    let now = Instant::now();    
+    println!("Input file is  {}", filename);    
+
+    
+    let (bod, alpha) = read_file(&filename);
+    let cos_alpha  = alpha.to_radians().cos();
+    let sin_alpha  = alpha.to_radians().sin();
+
+    let mut cof = coef(sin_alpha, cos_alpha, &bod);
+    gauss(1, &mut cof);
+    let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
+    let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
+
+    println!("Time elapsed: {} seconds.", now.elapsed().as_secs());
+    print(alpha, &bod, &cpd, cl, cm);
+}
+
+struct BOD {
+    ndtot: usize,
+    x: Vec<f64>,
+    y: Vec<f64>,
+    x_mid: Vec<f64>,
+    y_mid: Vec<f64>,
+    costhe: Vec<f64>,
+    sinthe: Vec<f64>,
+}
+
+struct COF {
+    a: Vec<f64>,
+    b: Vec<f64>,
+    n: usize,
+}
+
+struct CPD {
+    ue: Vec<f64>,
+    cp: Vec<f64>,
+}
+
+fn read_file(filename: &String) -> (BOD, f64) {
     let data = match fs::read_to_string(&filename) {
         Err(why) => panic!("Couldn't open {}: {}", filename, why.description()),
         Ok(data) => data,
@@ -57,49 +95,19 @@ fn main() {
         None => panic!("Error, end of file reached before alpha in {}.", filename),
     };
 
-    let cos_alpha  = alpha.to_radians().cos();
-    let sin_alpha  = alpha.to_radians().sin();
-
-    let bod = BOD {
-                ndtot,
-                x,
-                y,
-                x_mid,
-                y_mid,
-                costhe,
-                sinthe,
-                };
-
-    let mut cof = coef(sin_alpha, cos_alpha, &bod);
-    gauss(1, &mut cof);
-    let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
-    let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
-
-    print(alpha, &bod, &cpd, cl, cm);
+    (BOD {
+        ndtot,
+        x,
+        y,
+        x_mid,
+        y_mid,
+        costhe,
+        sinthe,
+        },
+    alpha)
 }
 
-struct BOD {
-    ndtot: usize,
-    x: Vec<f64>,
-    y: Vec<f64>,
-    x_mid: Vec<f64>,
-    y_mid: Vec<f64>,
-    costhe: Vec<f64>,
-    sinthe: Vec<f64>,
-}
-
-struct COF {
-    a: Vec<f64>,
-    b: Vec<f64>,
-    n: usize,
-}
-
-struct CPD {
-    ue: Vec<f64>,
-    cp: Vec<f64>,
-}
-
-fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF{
+fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF {
     let n = bod.ndtot + 1;
     let mut a = vec![0.; n*n];
     let mut bv = vec![0.; n];
