@@ -82,7 +82,7 @@ fn main() {
     /*for i in 0..cof.b.len(){
         println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
     }*/
-    gauss(0, &mut cof);
+    gauss(1, &mut cof);
     /*for i in 0..cof.b.len(){
         println!("{},{} {}", i, 183, cof.a[i*cof.b.len() + 183]); // GOOD
     }*/
