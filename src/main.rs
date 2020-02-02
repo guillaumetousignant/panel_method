@@ -265,16 +265,18 @@ fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
 }
 
 fn plot(bod: &BOD, cpd: &CPD) {
+    let cp_minus: Vec<f64> = cpd.cp.iter().map(|v| v * -1.).collect();
+
     let mut fg = Figure::new();
     fg.axes2d()
         .set_title("Cp with x", &[])
         .set_legend(Graph(0.5), Graph(0.9), &[], &[])
         .set_x_label("x", &[])
-        .set_y_label("Cp", &[])
+        .set_y_label("-Cp", &[])
         .lines(
             &bod.x_mid,
-            &cpd.cp,
-            &[Caption("Cp")],
+            &cp_minus,
+            &[Caption("-Cp")],
         );
     fg.show().unwrap();
 }
