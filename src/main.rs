@@ -5,27 +5,28 @@ use gnuplot::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let filename = match args.len() > 1 {
-        true => args[1].clone(),
-        false => get_input("Enter input file name (include extension name)"),
+    let filenames = match args.len() > 1 {
+        true => args[1..].to_vec(),
+        false => vec![get_input("Enter input file name (include extension name)")],
     };
 
-    let now = Instant::now();    
-    println!("Input file is  {}", filename);    
+    for (i, filename) in filenames.iter().enumerate() {
+        let now = Instant::now();    
+        println!("Input file is  {}", filename);    
 
-    
-    let (bod, alpha) = read_file(&filename);
-    let cos_alpha  = alpha.to_radians().cos();
-    let sin_alpha  = alpha.to_radians().sin();
+        let (bod, alpha) = read_file(&filename);
+        let cos_alpha  = alpha.to_radians().cos();
+        let sin_alpha  = alpha.to_radians().sin();
 
-    let mut cof = coef(sin_alpha, cos_alpha, &bod);
-    gauss(1, &mut cof);
-    let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
-    let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
+        let mut cof = coef(sin_alpha, cos_alpha, &bod);
+        gauss(1, &mut cof);
+        let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
+        let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
 
-    println!("Time elapsed: {}ms.", now.elapsed().as_millis());
-    print(alpha, &bod, &cpd, cl, cm);
-    plot(&bod, &cpd);
+        println!("Time elapsed: {}ms.", now.elapsed().as_millis());
+        print(alpha, &bod, &cpd, cl, cm);
+        plot(&bod, &cpd);
+    }    
 }
 
 struct BOD {
@@ -247,7 +248,7 @@ fn get_input(prompt: &str) -> String{
 }
 
 fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
-    println!("\n\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
+    println!("\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
     println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
 
     for i in 0..bod.ndtot {
@@ -259,7 +260,7 @@ fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
                 ue = cpd.ue[i]);
     }
 
-    println!("\n\n    CL = {CL:>9.5}    CM = {CM:>9.5}",
+    println!("\n    CL = {CL:>9.5}    CM = {CM:>9.5}\n\n",
             CL = cl,
             CM = cm);
 }
