@@ -10,13 +10,16 @@ fn main() {
         false => vec![get_input("Enter input file name (include extension name)")],
     };
 
-    for (i, filename) in filenames.iter().enumerate() {
+    let mut bods: Vec<BOD> = Vec::with_capacity(filenames.len());
+    let mut cpds: Vec<CPD> = Vec::with_capacity(filenames.len());
+
+    for filename in filenames {
         let now = Instant::now();    
         println!("Input file is  {}", filename);    
 
-        let (bod, alpha) = read_file(&filename);
-        let cos_alpha  = alpha.to_radians().cos();
-        let sin_alpha  = alpha.to_radians().sin();
+        let bod = read_file(&filename);
+        let cos_alpha  = bod.alpha.to_radians().cos();
+        let sin_alpha  = bod.alpha.to_radians().sin();
 
         let mut cof = coef(sin_alpha, cos_alpha, &bod);
         gauss(1, &mut cof);
@@ -24,9 +27,13 @@ fn main() {
         let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
 
         println!("Time elapsed: {}ms.", now.elapsed().as_millis());
-        print(alpha, &bod, &cpd, cl, cm);
-        plot(&bod, &cpd);
+        print(&bod, &cpd, cl, cm);
+
+        bods.push(bod);
+        cpds.push(cpd);
     }    
+
+    plot(&bods, &cpds);
 }
 
 struct BOD {
@@ -35,6 +42,7 @@ struct BOD {
     y: Vec<f64>,
     x_mid: Vec<f64>,
     y_mid: Vec<f64>,
+    alpha: f64,
     costhe: Vec<f64>,
     sinthe: Vec<f64>,
 }
@@ -50,7 +58,7 @@ struct CPD {
     cp: Vec<f64>,
 }
 
-fn read_file(filename: &String) -> (BOD, f64) {
+fn read_file(filename: &String) -> BOD {
     let data = match fs::read_to_string(&filename) {
         Err(why) => panic!("Couldn't open {}: {}", filename, why.description()),
         Ok(data) => data,
@@ -98,16 +106,16 @@ fn read_file(filename: &String) -> (BOD, f64) {
         None => panic!("Error, end of file reached before alpha in {}.", filename),
     };
 
-    (BOD {
+    BOD {
         ndtot,
         x,
         y,
         x_mid,
         y_mid,
+        alpha,
         costhe,
         sinthe,
-        },
-    alpha)
+        }
 }
 
 fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF {
@@ -247,8 +255,8 @@ fn get_input(prompt: &str) -> String{
     input.trim().to_string()
 }
 
-fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
-    println!("\n SOLUTION AT ALPHA = {:>10.5}\n", alpha);
+fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
+    println!("\n SOLUTION AT ALPHA = {:>10.5}\n", bod.alpha);
     println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
 
     for i in 0..bod.ndtot {
@@ -265,19 +273,23 @@ fn print(alpha: f64, bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
             CM = cm);
 }
 
-fn plot(bod: &BOD, cpd: &CPD) {
-    let cp_minus: Vec<f64> = cpd.cp.iter().map(|v| v * -1.).collect();
-
+fn plot(bods: &Vec<BOD>, cpds: &Vec<CPD>) {
     let mut fg = Figure::new();
     fg.axes2d()
         .set_title("Cp with x", &[])
         .set_legend(Graph(0.5), Graph(0.9), &[], &[])
         .set_x_label("x", &[])
-        .set_y_label("-Cp", &[])
-        .lines(
-            &bod.x_mid,
-            &cp_minus,
-            &[Caption("-Cp")],
-        );
+        .set_y_label("-Cp", &[]);
+
+    for (i, bod) in bods.iter().enumerate() {
+        let cp_minus: Vec<f64> = cpds[i].cp.iter().map(|v| v * -1.).collect();
+        fg.axes2d()
+            .lines(
+                &bod.x_mid,
+                &cp_minus,
+                &[Caption(&format!("alpha = {}", bod.alpha))],
+            );
+    }
+
     fg.show().unwrap();
 }
