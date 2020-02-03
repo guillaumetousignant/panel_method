@@ -1,3 +1,7 @@
+// MCG 5136 Assignment 2
+// Guillaume Tousignant, 0300151859
+// February 3rd, 2020
+
 use std::error::Error;
 use std::fs;
 use std::io::Write;
