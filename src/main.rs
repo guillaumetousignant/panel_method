@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fs;
+use std::io::Write;
 use std::time::Instant;
-use gnuplot::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -10,11 +10,11 @@ fn main() {
         false => vec![get_input("Enter input file name (include extension name)")],
     };
 
-    for filename in filenames {
+    for filename in &filenames {
         let now = Instant::now();    
         println!("Input file is  {}", filename);    
 
-        let bod = read_file(&filename);
+        let bod = read_file(filename);
         let cos_alpha  = bod.alpha.to_radians().cos();
         let sin_alpha  = bod.alpha.to_radians().sin();
 
@@ -267,19 +267,20 @@ fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
 }
 
 fn plot(bod: &BOD, cpd: &CPD) {
-    let cp_minus: Vec<f64> = cpd.cp.iter().map(|v| v * -1.).collect();
+    let mut strings: Vec<String> = Vec::with_capacity(bod.ndtot+1);
 
-    let mut fg = Figure::new();
-    fg.axes2d()
-        .set_title("Cp with x", &[])
-        .set_legend(Graph(0.5), Graph(0.9), &[], &[])
-        .set_x_label("x", &[])
-        .set_y_label("-Cp", &[])
-        .lines(
-            &bod.x_mid,
-            &cp_minus,
-            &[Caption(&format!("alpha = {}", bod.alpha))],
-        );
+    strings.push(format!("TITLE = \"CP along airfoil\"
+VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
+ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.ndtot));
 
-    fg.show().unwrap();
+    for (i, x_mid) in bod.x_mid.iter().enumerate() {
+        strings.push(format!("{xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",
+                        xmid = x_mid,
+                        ymid = bod.y_mid[i],
+                        cp = cpd.cp[i],
+                        ue = cpd.ue[i]));
+    }
+
+    let mut file = fs::File::create(format!("cp-{}.dat", bod.alpha)).expect("Error, unable to create output file.");
+    writeln!(file, "{}", strings.join("\n")).expect("Error, unable to write to output file.");
 }
