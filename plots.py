@@ -45,7 +45,7 @@ for i in range(0, len(filenames)):
 plt.ylabel('-Cp')
 plt.xlabel('x [m]')
 plt.title("Cp along chord")
-plt.legend(legend_list, loc='lower right')
+plt.legend(legend_list, loc='upper right')
 plt.show()        
 
 
