@@ -273,9 +273,9 @@ fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
 fn plot(bod: &BOD, cpd: &CPD) {
     let mut strings: Vec<String> = Vec::with_capacity(bod.ndtot+1);
 
-    strings.push(format!("TITLE = \"CP along airfoil\"
+    strings.push(format!("TITLE = \"CP at alpha= {}\"
 VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
-ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.ndtot));
+ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndtot));
 
     for (i, x_mid) in bod.x_mid.iter().enumerate() {
         strings.push(format!("{xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",

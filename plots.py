@@ -7,11 +7,13 @@ import numpy as np
 import os
 import re
 
+alphas = []
 x_arrays = []
 y_arrays = []
 cp_arrays = []
 ue_arrays = []
 
+alpha_finder = re.compile(r"alpha= \d*")
 N_finder = re.compile(r"I= \d*")
 
 # Input from all the cp-X.dat files
@@ -19,6 +21,8 @@ filenames = [f for f in os.listdir(os.curdir) if os.path.isfile(f) and "cp-" in 
 for filename in filenames:
     with open(filename, 'r') as file:
         lines = file.readlines()
+        alpha_match = alpha_finder(lines[0])
+        alphas.append(float(alpha_match.group(0)[7:]))
         N_match = N_finder.search(lines[2])
         N = int(N_match.group(0)[3:])
         x_arrays.append(np.zeros(N))
@@ -33,7 +37,16 @@ for filename in filenames:
             cp_arrays[-1][i] = float(numbers[2])
             ue_arrays[-1][i] = float(numbers[3])
 
-        
+legend_list = []
+for i in range(0, len(filenames))
+    plt.plot(x_arrays[i], cp_arrays[i])
+    legend_list.append(f"alpha = {alphas[i]}°")
+
+plt.ylabel('-Cp')
+plt.xlabel('x [m]')
+plt.title("Cp along chord")
+plt.legend(legend_list, loc='upper left')
+plt.show()        
 
 
 
