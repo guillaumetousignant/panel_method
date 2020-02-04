@@ -37,15 +37,43 @@ for filename in filenames:
             cp_arrays[-1][i] = -float(numbers[2])
             ue_arrays[-1][i] = float(numbers[3])
 
+# Input from cl vs alpha file
+with open("clalpha.dat", 'r') as file:
+    lines = file.readlines()
+    N_runs_match = N_finder.search(lines[2])
+    N_runs = int(N_runs_match.group(0)[3:])
+    alpha_array = np.zeros(N_runs)
+    cl_array = np.zeros(N_runs)
+    cm_array = np.zeros(N_runs)
+
+    for i in range(0, N_runs):
+        numbers = lines[i+3].split()
+        alpha_array[i] = float(numbers[0])
+        cl_array[i] = float(numbers[1])
+        cm_array[i] = float(numbers[2])
+
+# Plotting cp
 legend_list = []
+cp_fig, cp_ax = plt.subplots(1, 1)
 for i in range(0, len(filenames)):
-    plt.plot(x_arrays[i], cp_arrays[i])
+    cp_ax.plot(x_arrays[i], cp_arrays[i])
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
-plt.grid()
-plt.xlim(0, 1)
-plt.ylabel('-Cp')
-plt.xlabel('x/c')
-plt.title("Cp along chord")
-plt.legend(legend_list, loc='upper right')
+cp_ax.grid()
+cp_ax.set_xlim(0, 1)
+cp_ax.set_ylabel('-Cp')
+cp_ax.set_xlabel('x/c')
+cp_ax.set_title("Cp along chord")
+cp_ax.legend(legend_list, loc='upper right')
+
+# Plotting cl vs alpha
+cl_legend_list = []
+cl_fig, cl_ax = plt.subplots(1, 1)
+cl_ax.plot(alpha_array, cl_array)
+
+cl_ax.grid()
+cl_ax.set_ylabel('CL')
+cl_ax.set_xlabel('$\\alpha$ [°]')
+cl_ax.set_title("CL vs $\\alpha$")
+
 plt.show()

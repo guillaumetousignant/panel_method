@@ -14,6 +14,8 @@ fn main() {
         false => vec![get_input("Enter input file name (include extension name)")],
     };
 
+    let mut cl_alpha: Vec<CLALPHA> = Vec::with_capacity(filenames.len());
+
     for filename in &filenames {
         let now = Instant::now();    
         println!("Input file is  {}", filename);    
@@ -29,8 +31,14 @@ fn main() {
 
         println!("Time elapsed: {}ms.", now.elapsed().as_millis());
         print(&bod, &cpd, cl, cm);
-        plot(&bod, &cpd);
+        write_cp(&bod, &cpd);
+        cl_alpha.push(CLALPHA {
+            alpha: bod.alpha,
+            cl,
+            cm,
+        });
     }    
+    write_cl_alpha(&cl_alpha);
 }
 
 struct BOD {
@@ -53,6 +61,12 @@ struct COF {
 struct CPD {
     ue: Vec<f64>,
     cp: Vec<f64>,
+}
+
+struct CLALPHA {
+    alpha: f64,
+    cl: f64,
+    cm: f64,
 }
 
 fn read_file(filename: &String) -> BOD {
@@ -270,21 +284,40 @@ fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
             CM = cm);
 }
 
-fn plot(bod: &BOD, cpd: &CPD) {
-    let mut strings: Vec<String> = Vec::with_capacity(bod.ndtot+1);
+fn write_cp(bod: &BOD, cpd: &CPD) {
+    let mut lines: Vec<String> = Vec::with_capacity(bod.ndtot+1);
 
-    strings.push(format!("TITLE = \"CP at alpha= {}\"
+    lines.push(format!("TITLE = \"CP at alpha= {}\"
 VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
 ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndtot));
 
     for (i, x_mid) in bod.x_mid.iter().enumerate() {
-        strings.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
+        lines.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
                         xmid = x_mid,
                         ymid = bod.y_mid[i],
                         cp = cpd.cp[i],
                         ue = cpd.ue[i]));
     }
 
-    let mut file = fs::File::create(format!("cp-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create output file.");
-    writeln!(file, "{}", strings.join("\n")).expect("Error, unable to write to output file.");
+    let mut file = fs::File::create(format!("cp-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create cp output file.");
+    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cp output file.");
+}
+
+fn write_cl_alpha(cl_alpha: &Vec<CLALPHA>) {
+    let mut lines: Vec<String> = Vec::with_capacity(cl_alpha.len()+1);
+
+    lines.push(format!("TITLE = \"CL versus alpha\"
+VARIABLES = \"alpha\", \"CL\", \"CM\"
+ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", cl_alpha.len()));
+
+    for run in cl_alpha {
+        lines.push(format!("{alpha:>12.9} {cl:>12.9} {cm:>12.9}",
+                        alpha = run.alpha,
+                        cl = run.cl,
+                        cm = run.cm
+                        ));
+    }
+
+    let mut file = fs::File::create("clalpha.dat").expect("Error, unable to create cl vs alpha output file.");
+    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cl vs alpha output file.");
 }
