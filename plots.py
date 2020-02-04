@@ -34,7 +34,7 @@ for filename in filenames:
             numbers = lines[i+3].split()
             x_arrays[-1][i] = float(numbers[0])
             y_arrays[-1][i] = float(numbers[1])
-            cp_arrays[-1][i] = float(numbers[2])
+            cp_arrays[-1][i] = -float(numbers[2])
             ue_arrays[-1][i] = float(numbers[3])
 
 legend_list = []
@@ -45,7 +45,7 @@ for i in range(0, len(filenames)):
 plt.ylabel('-Cp')
 plt.xlabel('x [m]')
 plt.title("Cp along chord")
-plt.legend(legend_list, loc='upper left')
+plt.legend(legend_list, loc='lower right')
 plt.show()        
 
 
