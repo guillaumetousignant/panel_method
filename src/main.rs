@@ -329,11 +329,11 @@ ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndt
 }
 
 fn write_psi(x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, psi_mat: &Vec<f64>) {
-    let mut lines: Vec<String> = Vec::with_capacity(bod.ndtot+1);
+    let mut lines: Vec<String> = Vec::with_capacity(psi_mat.len()+1);
 
-    lines.push(format!("TITLE = \"CP at alpha= {}\"
-VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
-ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndtot));
+    lines.push(format!("TITLE = \"Psi at alpha= {}\"
+VARIABLES = \"X\", \"Y\", \"Psi\"
+ZONE T= \"Zone     1\",  I= {},  J= {},  DATAPACKING = POINT", bod.alpha, x_vec.len(), y_vec.len()));
 
     for (i, x_mid) in bod.x_mid.iter().enumerate() {
         lines.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
