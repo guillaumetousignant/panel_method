@@ -16,6 +16,12 @@ fn main() {
 
     let mut cl_alpha: Vec<CLALPHA> = Vec::with_capacity(filenames.len());
 
+    let psi_res: [usize; 2] = [100, 100];
+    let psi_origin = [-1.0, -1.0];
+    let psi_span = [3.0, 3.0];
+    let psi_x: Vec<f64> = (0..psi_res[0]).map(|x| psi_origin[0] + (x as f64)/(psi_res[0] as f64)).collect();
+    let psi_y: Vec<f64> = (0..psi_res[1]).map(|y| psi_origin[1] + (y as f64)/(psi_res[1] as f64)).collect();
+
     for filename in &filenames {
         let now = Instant::now();    
         println!("Input file is  {}", filename);    
@@ -28,10 +34,13 @@ fn main() {
         gauss(1, &mut cof);
         let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
         let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
+        let psi_mat = calculate_psi(sin_alpha, &psi_x, &psi_y, &bod, &cof);
 
         println!("Time elapsed: {}ms.", now.elapsed().as_millis());
         print(&bod, &cpd, cl, cm);
         write_cp(&bod, &cpd);
+        write_psi(&psi_x, &psi_y, &bod, &psi_mat);
+
         cl_alpha.push(CLALPHA {
             alpha: bod.alpha,
             cl,
@@ -256,6 +265,22 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     (cl, cm)
 }
 
+fn calculate_psi(sin_alpha: f64, x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, cof: &COF) -> Vec<f64> {
+    let qs = &cof.b[0..bod.ndtot];
+    let gamma = cof.b[cof.n-1];
+    let mut psi_mat = vec![sin_alpha; x_vec.len()*y_vec.len()];
+
+    for (i, x) in x_vec.iter().enumerate() {
+        for (j, y) in y_vec.iter().enumerate() {
+            for (k, q) in qs.iter().enumerate() {
+                psi_mat[i*y_vec.len() + j] += q * 0.5/std::f64::consts::PI * (y - bod.y_mid[k]).atan2(x - bod.x_mid[k]) 
+                                            - gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // No type deduction for pow??
+            }
+        }
+    }
+    psi_mat
+}
+
 fn get_input(prompt: &str) -> String{
     println!("{}",prompt);
     let mut input = String::new();
@@ -285,6 +310,25 @@ fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
 }
 
 fn write_cp(bod: &BOD, cpd: &CPD) {
+    let mut lines: Vec<String> = Vec::with_capacity(bod.ndtot+1);
+
+    lines.push(format!("TITLE = \"CP at alpha= {}\"
+VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
+ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndtot));
+
+    for (i, x_mid) in bod.x_mid.iter().enumerate() {
+        lines.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
+                        xmid = x_mid,
+                        ymid = bod.y_mid[i],
+                        cp = cpd.cp[i],
+                        ue = cpd.ue[i]));
+    }
+
+    let mut file = fs::File::create(format!("cp-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create cp output file.");
+    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cp output file.");
+}
+
+fn write_psi(x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, psi_mat: &Vec<f64>) {
     let mut lines: Vec<String> = Vec::with_capacity(bod.ndtot+1);
 
     lines.push(format!("TITLE = \"CP at alpha= {}\"
