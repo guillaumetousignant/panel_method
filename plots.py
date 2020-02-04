@@ -40,11 +40,11 @@ for filename in filenames:
 legend_list = []
 for i in range(0, len(filenames)):
     plt.plot(x_arrays[i], cp_arrays[i])
-    legend_list.append(f"alpha = {alphas[i]}°")
+    legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
 plt.grid()
 plt.ylabel('-Cp')
-plt.xlabel('x [m]')
+plt.xlabel('x/c')
 plt.title("Cp along chord")
 plt.legend(legend_list, loc='upper right')
 plt.show()
