@@ -47,15 +47,4 @@ plt.ylabel('-Cp')
 plt.xlabel('x [m]')
 plt.title("Cp along chord")
 plt.legend(legend_list, loc='upper right')
-plt.show()        
-
-
-
-#y = np.zeros(n_steps)
-
-# Plotting
-#plt.plot(t, y)
-#plt.ylabel('y [m]')
-#plt.xlabel('t [d]')
-#plt.title(f"Height of fluid with time, delta_t = {delta_t}")
-#plt.show()
+plt.show()
