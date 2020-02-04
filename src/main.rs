@@ -285,6 +285,6 @@ ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndt
                         ue = cpd.ue[i]));
     }
 
-    let mut file = fs::File::create(format!("cp-{:3}.dat", bod.alpha)).expect("Error, unable to create output file.");
+    let mut file = fs::File::create(format!("cp-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create output file.");
     writeln!(file, "{}", strings.join("\n")).expect("Error, unable to write to output file.");
 }
