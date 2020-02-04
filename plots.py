@@ -43,6 +43,7 @@ for i in range(0, len(filenames)):
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
 plt.grid()
+plt.xlim(0, 1)
 plt.ylabel('-Cp')
 plt.xlabel('x/c')
 plt.title("Cp along chord")

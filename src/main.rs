@@ -278,7 +278,7 @@ VARIABLES = \"X\", \"Y\", \"Cp\", \"Ue\"
 ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndtot));
 
     for (i, x_mid) in bod.x_mid.iter().enumerate() {
-        strings.push(format!("{xmid:>9.5} {ymid:>9.5} {cp:>9.5} {ue:>9.5}",
+        strings.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
                         xmid = x_mid,
                         ymid = bod.y_mid[i],
                         cp = cpd.cp[i],
