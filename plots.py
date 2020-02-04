@@ -21,7 +21,7 @@ filenames = [f for f in os.listdir(os.curdir) if os.path.isfile(f) and "cp-" in 
 for filename in filenames:
     with open(filename, 'r') as file:
         lines = file.readlines()
-        alpha_match = alpha_finder(lines[0])
+        alpha_match = alpha_finder.search(lines[0])
         alphas.append(float(alpha_match.group(0)[7:]))
         N_match = N_finder.search(lines[2])
         N = int(N_match.group(0)[3:])
@@ -38,7 +38,7 @@ for filename in filenames:
             ue_arrays[-1][i] = float(numbers[3])
 
 legend_list = []
-for i in range(0, len(filenames))
+for i in range(0, len(filenames)):
     plt.plot(x_arrays[i], cp_arrays[i])
     legend_list.append(f"alpha = {alphas[i]}°")
 
