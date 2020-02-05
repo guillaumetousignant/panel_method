@@ -108,6 +108,7 @@ cl_ax.set_title("CL vs $\\alpha$")
 for i in range(0, len(filenames_psi)):
     psi_fig, psi_ax = plt.subplots(1, 1)
     cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i])
+    psi_ax.plot(x_arrays[i], y_arrays[i], color='red') # Assuming cp and psi files are the same airfoil
 
     psi_fig.colorbar(cp) # Add a colorbar to a plot
     psi_ax.set_xlabel('x/c')
