@@ -2,3 +2,4 @@
 **/*.rs.bk
 *.lock
 *.dat
+.vscode/settings.json
