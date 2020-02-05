@@ -34,7 +34,7 @@ fn main() {
         gauss(1, &mut cof);
         let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
         let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
-        let psi_mat = calculate_psi(sin_alpha, &psi_x, &psi_y, &bod, &cof);
+        let psi_mat = calculate_psi(sin_alpha, cos_alpha, &psi_x, &psi_y, &bod, &cof);
 
         println!("Time elapsed: {}ms.", now.elapsed().as_millis());
         print(&bod, &cpd, cl, cm);
@@ -227,7 +227,8 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
                     let dxjp = bod.x_mid[i] - bod.x[j+1];
                     let dyj = bod.y_mid[i] - bod.y[j];
                     let dyjp = bod.y_mid[i] - bod.y[j+1];
-                    (0.5 * ((dxjp*dxjp + dyjp*dyjp)/(dxj*dxj + dyj*dyj)).ln(), (dyjp*dxj - dxjp*dyj).atan2(dxjp*dxj + dyjp*dyj))
+                    (0.5 * ((dxjp*dxjp + dyjp*dyjp)/(dxj*dxj + dyj*dyj)).ln(), 
+                        (dyjp*dxj - dxjp*dyj).atan2(dxjp*dxj + dyjp*dyj))
                 },
             };
 
@@ -265,13 +266,14 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     (cl, cm)
 }
 
-fn calculate_psi(sin_alpha: f64, x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, cof: &COF) -> Vec<f64> {
+fn calculate_psi(sin_alpha: f64, cos_alpha: f64, x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, cof: &COF) -> Vec<f64> {
     let qs = &cof.b[0..bod.ndtot];
     let gamma = cof.b[cof.n-1];
-    let mut psi_mat = vec![sin_alpha; x_vec.len()*y_vec.len()];
+    let mut psi_mat = vec![0.0; x_vec.len()*y_vec.len()];
 
     for (i, x) in x_vec.iter().enumerate() {
         for (j, y) in y_vec.iter().enumerate() {
+            psi_mat[i*y_vec.len() + j] += cos_alpha*y + sin_alpha*x;
             for (k, q) in qs.iter().enumerate() {
                 psi_mat[i*y_vec.len() + j] += q * 0.5/std::f64::consts::PI * (y - bod.y_mid[k]).atan2(x - bod.x_mid[k]) 
                                             - gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // No type deduction for pow??
