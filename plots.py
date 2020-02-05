@@ -116,9 +116,9 @@ for i in range(0, len(filenames)):
 
 cp_ax.grid()
 cp_ax.set_xlim(0, 1)
-cp_ax.set_ylabel('-Cp')
+cp_ax.set_ylabel('-$C_p$')
 cp_ax.set_xlabel('x/c')
-cp_ax.set_title("Cp along chord")
+cp_ax.set_title("$C_p$ along chord")
 cp_ax.legend(legend_list, loc='upper right')
 
 # Plotting cl vs alpha
@@ -126,9 +126,9 @@ cl_fig, cl_ax = plt.subplots(1, 1)
 cl_ax.plot(alpha_array, cl_array)
 
 cl_ax.grid()
-cl_ax.set_ylabel('CL')
+cl_ax.set_ylabel('$C_L$')
 cl_ax.set_xlabel('$\\alpha$ [°]')
-cl_ax.set_title("CL vs $\\alpha$")
+cl_ax.set_title("$C_L$ vs $\\alpha$")
 
 # Plotting streamlines
 for i in range(0, len(filenames_psi)):
@@ -150,7 +150,7 @@ for i in range(0, len(filenames_uxuy)):
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
 ux_ax.grid()
-ux_ax.set_ylabel('$U_x$')
+ux_ax.set_ylabel('$U_x/V_\\infty$')
 ux_ax.set_xlabel('$y/c$')
 ux_ax.set_title("$U_x$ along c/4")
 ux_ax.legend(legend_list, loc='upper right')
