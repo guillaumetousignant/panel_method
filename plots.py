@@ -55,7 +55,7 @@ for filename in filenames_psi:
         J = int(J_match.group(0)[3:])
         x_arrays_psi.append(np.zeros(I))
         y_arrays_psi.append(np.zeros(J))
-        psi_arrays.append(np.zeros((I, J)))
+        psi_arrays.append(np.zeros((J, I)))
 
         for i in range(0, I):
             for j in range(0, J):
@@ -64,7 +64,7 @@ for filename in filenames_psi:
                     x_arrays_psi[-1][i] = float(numbers[0])
                 if i == 0:
                     y_arrays_psi[-1][j] = float(numbers[1])
-                psi_arrays[-1][i, j] = float(numbers[2])
+                psi_arrays[-1][j, i] = float(numbers[2])
 
 # Input from cl vs alpha file
 with open("clalpha.dat", 'r') as file:
@@ -113,5 +113,6 @@ for i in range(0, len(filenames_psi)):
     psi_ax.set_xlabel('x/c')
     psi_ax.set_ylabel('y/c')
     psi_ax.set_title(f"Streamlines at $\\alpha$ = {alphas[i]}°")
+    psi_ax.axis('scaled')
 
 plt.show()
