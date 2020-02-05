@@ -19,8 +19,8 @@ fn main() {
     let psi_res: [usize; 2] = [100, 100];
     let psi_origin = [-1.0, -1.0];
     let psi_span = [3.0, 3.0];
-    let psi_x: Vec<f64> = (0..psi_res[0]).map(|x| psi_origin[0] + (x as f64)/(psi_res[0] as f64)).collect();
-    let psi_y: Vec<f64> = (0..psi_res[1]).map(|y| psi_origin[1] + (y as f64)/(psi_res[1] as f64)).collect();
+    let psi_x: Vec<f64> = (0..psi_res[0]).map(|x| psi_origin[0] + psi_span[0] * (x as f64)/(psi_res[0] as f64)).collect();
+    let psi_y: Vec<f64> = (0..psi_res[1]).map(|y| psi_origin[1] + psi_span[1] * (y as f64)/(psi_res[1] as f64)).collect();
 
     for filename in &filenames {
         let now = Instant::now();    
@@ -335,16 +335,17 @@ fn write_psi(x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, psi_mat: &Vec<f64>) 
 VARIABLES = \"X\", \"Y\", \"Psi\"
 ZONE T= \"Zone     1\",  I= {},  J= {},  DATAPACKING = POINT", bod.alpha, x_vec.len(), y_vec.len()));
 
-    for (i, x_mid) in bod.x_mid.iter().enumerate() {
-        lines.push(format!("{xmid:>12.9} {ymid:>12.9} {cp:>12.9} {ue:>12.9}",
-                        xmid = x_mid,
-                        ymid = bod.y_mid[i],
-                        cp = cpd.cp[i],
-                        ue = cpd.ue[i]));
+    for (i, x) in x_vec.iter().enumerate() {
+        for (j, y) in y_vec.iter().enumerate() {
+            lines.push(format!("{x:>12.9} {y:>12.9} {psi:>12.9}",
+                        x = x,
+                        y = y,
+                        psi = psi_mat[i*x_vec.len() + j]));
+        }
     }
 
-    let mut file = fs::File::create(format!("cp-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create cp output file.");
-    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cp output file.");
+    let mut file = fs::File::create(format!("psi-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create psi output file.");
+    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to psi output file.");
 }
 
 fn write_cl_alpha(cl_alpha: &Vec<CLALPHA>) {
