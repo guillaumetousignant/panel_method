@@ -121,6 +121,20 @@ cp_ax.set_xlabel('x/c')
 cp_ax.set_title("$C_p$ along chord")
 cp_ax.legend(legend_list, loc='upper right')
 
+# Plotting ue
+legend_list_ue = []
+ue_fig, ue_ax = plt.subplots(1, 1)
+for i in range(0, len(filenames)):
+    ue_ax.plot(x_arrays[i], ue_arrays[i])
+    legend_list.append(f"$\\alpha$ = {alphas[i]}°")
+
+ue_ax.grid()
+ue_ax.set_xlim(0, 1)
+ue_ax.set_ylabel('$U_e/V_\\infty$')
+ue_ax.set_xlabel('x/c')
+ue_ax.set_title("$U_e$ along chord")
+ue_ax.legend(legend_list, loc='upper right')
+
 # Plotting cl vs alpha
 cl_fig, cl_ax = plt.subplots(1, 1)
 cl_ax.plot(alpha_array, cl_array)
