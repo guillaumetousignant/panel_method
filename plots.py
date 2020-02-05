@@ -45,7 +45,7 @@ for filename in filenames:
             x_arrays[-1][i] = float(numbers[0])
             y_arrays[-1][i] = float(numbers[1])
             cp_arrays[-1][i] = -float(numbers[2])
-            ue_arrays[-1][i] = float(numbers[3])
+            ue_arrays[-1][i] = 1.0 + float(numbers[3])
 
 # Input from all the psi-X.dat files
 filenames_psi = [f for f in os.listdir(os.curdir) if os.path.isfile(f) and "psi-" in f and f.endswith(".dat")]
