@@ -12,9 +12,14 @@ x_arrays = []
 y_arrays = []
 cp_arrays = []
 ue_arrays = []
+alphas_psi = []
+x_arrays_psi = []
+y_arrays_psi = []
+psi_arrays = []
 
 alpha_finder = re.compile(r"alpha= \d*")
-N_finder = re.compile(r"I= \d*")
+I_finder = re.compile(r"I= \d*")
+J_finder = re.compile(r"J= \d*")
 
 # Input from all the cp-X.dat files
 filenames = [f for f in os.listdir(os.curdir) if os.path.isfile(f) and "cp-" in f and f.endswith(".dat")]
@@ -23,7 +28,7 @@ for filename in filenames:
         lines = file.readlines()
         alpha_match = alpha_finder.search(lines[0])
         alphas.append(float(alpha_match.group(0)[7:]))
-        N_match = N_finder.search(lines[2])
+        N_match = I_finder.search(lines[2])
         N = int(N_match.group(0)[3:])
         x_arrays.append(np.zeros(N))
         y_arrays.append(np.zeros(N))
@@ -37,10 +42,34 @@ for filename in filenames:
             cp_arrays[-1][i] = -float(numbers[2])
             ue_arrays[-1][i] = float(numbers[3])
 
+# Input from all the psi-X.dat files
+filenames_psi = [f for f in os.listdir(os.curdir) if os.path.isfile(f) and "psi-" in f and f.endswith(".dat")]
+for filename in filenames_psi:
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+        alpha_match = alpha_finder.search(lines[0])
+        alphas_psi.append(float(alpha_match.group(0)[7:]))
+        I_match = I_finder.search(lines[2])
+        I = int(I_match.group(0)[3:])
+        J_match = J_finder.search(lines[2])
+        J = int(J_match.group(0)[3:])
+        x_arrays_psi.append(np.zeros(I))
+        y_arrays_psi.append(np.zeros(J))
+        psi_arrays.append(np.zeros((I, J)))
+
+        for i in range(0, I):
+            for j in range(0, J):
+                numbers = lines[i+3].split()
+                if j == 0:
+                    x_arrays_psi[-1][i] = float(numbers[0])
+                if i == 0:
+                    y_arrays_psi[-1][j] = float(numbers[1])
+                psi_arrays[-1][i, j] = float(numbers[2])
+
 # Input from cl vs alpha file
 with open("clalpha.dat", 'r') as file:
     lines = file.readlines()
-    N_runs_match = N_finder.search(lines[2])
+    N_runs_match = I_finder.search(lines[2])
     N_runs = int(N_runs_match.group(0)[3:])
     alpha_array = np.zeros(N_runs)
     cl_array = np.zeros(N_runs)
@@ -67,7 +96,6 @@ cp_ax.set_title("Cp along chord")
 cp_ax.legend(legend_list, loc='upper right')
 
 # Plotting cl vs alpha
-cl_legend_list = []
 cl_fig, cl_ax = plt.subplots(1, 1)
 cl_ax.plot(alpha_array, cl_array)
 
@@ -75,5 +103,15 @@ cl_ax.grid()
 cl_ax.set_ylabel('CL')
 cl_ax.set_xlabel('$\\alpha$ [°]')
 cl_ax.set_title("CL vs $\\alpha$")
+
+# Plotting streamlines
+for i in range(0, len(filenames_psi)):
+    psi_fig, psi_ax = plt.subplots(1, 1)
+    cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], x_arrays_psi[i])
+
+    fig.colorbar(cp) # Add a colorbar to a plot
+    psi_ax.set_ylabel('y/c')
+    psi_ax.set_xlabel('x/c')
+    psi_ax.set_title(f"Streamlines at $\\alpha$ = {alphas[i]}°")
 
 plt.show()
