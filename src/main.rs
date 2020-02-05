@@ -16,11 +16,23 @@ fn main() {
 
     let mut cl_alpha: Vec<CLALPHA> = Vec::with_capacity(filenames.len());
 
-    let psi_res: [usize; 2] = [100, 100];
-    let psi_origin = [-1.0, -1.0];
-    let psi_span = [3.0, 2.0];
-    let psi_x: Vec<f64> = (0..psi_res[0]).map(|x| psi_origin[0] + psi_span[0] * (x as f64)/(psi_res[0] as f64)).collect();
-    let psi_y: Vec<f64> = (0..psi_res[1]).map(|y| psi_origin[1] + psi_span[1] * (y as f64)/(psi_res[1] as f64)).collect();
+    let psi_params = PLOTPARAMS {
+        res_x: 120,
+        res_y: 80,
+        origin_x: -1.0,
+        origin_y: -1.0,
+        span_x: 3.0,
+        span_y: 2.0,
+    };
+
+    let uxuy_params = PLOTPARAMS {
+        res_x: 1,
+        res_y: 80,
+        origin_x: 0.25,
+        origin_y: -1.0,
+        span_x: 0.0,
+        span_y: 2.0,
+    };
 
     for filename in &filenames {
         let now = Instant::now();    
@@ -34,12 +46,14 @@ fn main() {
         gauss(1, &mut cof);
         let cpd = vpdis(sin_alpha, cos_alpha, &bod, &cof);
         let (cl, cm) = clcm(sin_alpha, cos_alpha, &bod, &cpd);
-        let psi_mat = calculate_psi(sin_alpha, cos_alpha, &psi_x, &psi_y, &bod, &cof);
+        let psi = calculate_psi(sin_alpha, cos_alpha, &psi_params, &bod, &cof);
+        let uxuy = velocity_slice(sin_alpha, cos_alpha, &uxuy_params, &bod, &cof);
 
         println!("Time elapsed: {}ms.", now.elapsed().as_millis());
         print(&bod, &cpd, cl, cm);
         write_cp(&bod, &cpd);
-        write_psi(&psi_x, &psi_y, &bod, &psi_mat);
+        write_psi(&bod, &psi);
+        write_uxuy(&bod, &uxuy);
 
         cl_alpha.push(CLALPHA {
             alpha: bod.alpha,
@@ -76,6 +90,28 @@ struct CLALPHA {
     alpha: f64,
     cl: f64,
     cm: f64,
+}
+
+struct UXUY {
+    x: f64,
+    y: Vec<f64>,
+    u_x: Vec<f64>,
+    u_y: Vec<f64>,
+}
+
+struct PSI {
+    x: Vec<f64>,
+    y: Vec<f64>,
+    psi: Vec<f64>,
+}
+
+struct PLOTPARAMS {
+    res_x: usize,
+    res_y: usize,
+    origin_x: f64,
+    origin_y: f64,
+    span_x: f64,
+    span_y: f64,
 }
 
 fn read_file(filename: &String) -> BOD {
@@ -244,7 +280,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
 
     CPD {
         ue, 
-        cp
+        cp,
     }
 }
 
@@ -266,7 +302,10 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     (cl, cm)
 }
 
-fn calculate_psi(sin_alpha: f64, cos_alpha: f64, x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, cof: &COF) -> Vec<f64> {
+fn calculate_psi(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD, cof: &COF) -> PSI {
+    let x_vec: Vec<f64> = (0..params.res_x).map(|x| params.origin_x + params.span_x * (x as f64)/(params.res_x as f64)).collect();
+    let y_vec: Vec<f64> = (0..params.res_y).map(|y| params.origin_y + params.span_y * (y as f64)/(params.res_y as f64)).collect();
+    
     let qs = &cof.b[0..bod.ndtot];
     let gamma = cof.b[cof.n-1];
     let mut psi_mat = vec![0.0; x_vec.len()*y_vec.len()];
@@ -280,7 +319,49 @@ fn calculate_psi(sin_alpha: f64, cos_alpha: f64, x_vec: &Vec<f64>, y_vec: &Vec<f
             }
         }
     }
-    psi_mat
+
+    PSI {
+        x: x_vec,
+        y: y_vec,
+        psi: psi_mat,
+    }
+}
+
+fn velocity_slice(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD, cof: &COF) -> UXUY {
+    let y_vec: Vec<f64> = (0..params.res_y).map(|y| params.origin_y + params.span_y * (y as f64)/(params.res_y as f64)).collect();
+
+    let q = &cof.b[0..bod.ndtot];
+    let gamma = cof.b[cof.n-1];
+    let mut u_x = vec![cos_alpha; y_vec.len()];
+    let mut u_y = vec![sin_alpha; y_vec.len()];
+
+    for (i, y) in y_vec.iter().enumerate() {
+        for j in 0..bod.ndtot {
+            let (flog, ftan) = match j == i {
+                true => (0., std::f64::consts::PI),
+                false => {
+                    let dxj = params.origin_x - bod.x[j];
+                    let dxjp = params.origin_x - bod.x[j+1];
+                    let dyj = y - bod.y[j];
+                    let dyjp = y - bod.y[j+1];
+                    (0.5 * ((dxjp*dxjp + dyjp*dyjp)/(dxj*dxj + dyj*dyj)).ln(), 
+                        (dyjp*dxj - dxjp*dyj).atan2(dxjp*dxj + dyjp*dyj))
+                },
+            };
+
+            let aa = 0.5/std::f64::consts::PI * ftan;
+            let b = 0.5/std::f64::consts::PI * flog;
+            u_x[i] -= b*q[j] - gamma*aa;
+            u_y[i] -= b*q[j] - gamma*aa; // Not sure
+        }
+    }
+
+    UXUY {
+        x: params.origin_x,
+        y: y_vec,
+        u_x,
+        u_y,
+    }
 }
 
 fn get_input(prompt: &str) -> String{
@@ -330,24 +411,43 @@ ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndt
     writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cp output file.");
 }
 
-fn write_psi(x_vec: &Vec<f64>, y_vec: &Vec<f64>, bod: &BOD, psi_mat: &Vec<f64>) {
-    let mut lines: Vec<String> = Vec::with_capacity(psi_mat.len()+1);
+fn write_psi(bod: &BOD, psi: &PSI) {
+    let mut lines: Vec<String> = Vec::with_capacity(psi.psi.len()+1);
 
     lines.push(format!("TITLE = \"Psi at alpha= {}\"
 VARIABLES = \"X\", \"Y\", \"Psi\"
-ZONE T= \"Zone     1\",  I= {},  J= {},  DATAPACKING = POINT", bod.alpha, x_vec.len(), y_vec.len()));
+ZONE T= \"Zone     1\",  I= {},  J= {},  DATAPACKING = POINT", bod.alpha, psi.x.len(), psi.y.len()));
 
-    for (i, x) in x_vec.iter().enumerate() {
-        for (j, y) in y_vec.iter().enumerate() {
+    for (i, x) in psi.x.iter().enumerate() {
+        for (j, y) in psi.y.iter().enumerate() {
             lines.push(format!("{x:>12.9} {y:>12.9} {psi:>12.9}",
                         x = x,
                         y = y,
-                        psi = psi_mat[i*x_vec.len() + j]));
+                        psi = psi.psi[i*psi.y.len() + j]));
         }
     }
 
     let mut file = fs::File::create(format!("psi-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create psi output file.");
     writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to psi output file.");
+}
+
+fn write_uxuy(bod: &BOD, uxuy: &UXUY) {
+    let mut lines: Vec<String> = Vec::with_capacity(uxuy.y.len()+1);
+
+    lines.push(format!("TITLE = \"Velocity at c/4 at alpha= {}\"
+VARIABLES = \"X\", \"Y\", \"U_x\", \"U_y\"
+ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, uxuy.y.len()));
+
+    for (i, y) in uxuy.y.iter().enumerate() {
+        lines.push(format!("{x:>12.9} {y:>12.9} {u_x:>12.9} {u_y:>12.9}",
+                    x = uxuy.x,
+                    y = y,
+                    u_x = uxuy.u_x[i],
+                    u_y = uxuy.u_y[i]));
+    }
+
+    let mut file = fs::File::create(format!("uxuy-{:0width$}.dat", bod.alpha, width = 3)).expect("Error, unable to create uxuy output file.");
+    writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to uxuy output file.");
 }
 
 fn write_cl_alpha(cl_alpha: &Vec<CLALPHA>) {
