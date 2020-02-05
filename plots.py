@@ -59,7 +59,7 @@ for filename in filenames_psi:
 
         for i in range(0, I):
             for j in range(0, J):
-                numbers = lines[i+3].split()
+                numbers = lines[i*J + j + 3].split()
                 if j == 0:
                     x_arrays_psi[-1][i] = float(numbers[0])
                 if i == 0:
@@ -110,8 +110,8 @@ for i in range(0, len(filenames_psi)):
     cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i])
 
     psi_fig.colorbar(cp) # Add a colorbar to a plot
-    psi_ax.set_ylabel('y/c')
     psi_ax.set_xlabel('x/c')
+    psi_ax.set_ylabel('y/c')
     psi_ax.set_title(f"Streamlines at $\\alpha$ = {alphas[i]}°")
 
 plt.show()
