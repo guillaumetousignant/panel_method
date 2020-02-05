@@ -107,7 +107,7 @@ cl_ax.set_title("CL vs $\\alpha$")
 # Plotting streamlines
 for i in range(0, len(filenames_psi)):
     psi_fig, psi_ax = plt.subplots(1, 1)
-    cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], x_arrays_psi[i])
+    cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i])
 
     fig.colorbar(cp) # Add a colorbar to a plot
     psi_ax.set_ylabel('y/c')
