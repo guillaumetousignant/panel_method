@@ -40,7 +40,7 @@ for filename in filenames:
         cp_arrays.append(np.zeros(N))
         ue_arrays.append(np.zeros(N))
 
-        for i in range(0, N):
+        for i in range(N):
             numbers = lines[i+3].split()
             x_arrays[-1][i] = float(numbers[0])
             y_arrays[-1][i] = float(numbers[1])
@@ -62,8 +62,8 @@ for filename in filenames_psi:
         y_arrays_psi.append(np.zeros(J))
         psi_arrays.append(np.zeros((J, I)))
 
-        for i in range(0, I):
-            for j in range(0, J):
+        for i in range(I):
+            for j in range(J):
                 numbers = lines[i*J + j + 3].split()
                 if j == 0:
                     x_arrays_psi[-1][i] = float(numbers[0])
@@ -85,7 +85,7 @@ for filename in filenames_uxuy:
         ux_arrays.append(np.zeros(N))
         uy_arrays.append(np.zeros(N))
 
-        for i in range(0, N):
+        for i in range(N):
             numbers = lines[i+3].split()
             x_arrays_uxuy[-1][i] = float(numbers[0])
             y_arrays_uxuy[-1][i] = float(numbers[1])
@@ -101,7 +101,7 @@ with open("clalpha.dat", 'r') as file:
     cl_array = np.zeros(N_runs)
     cm_array = np.zeros(N_runs)
 
-    for i in range(0, N_runs):
+    for i in range(N_runs):
         numbers = lines[i+3].split()
         alpha_array[i] = float(numbers[0])
         cl_array[i] = float(numbers[1])
@@ -110,7 +110,7 @@ with open("clalpha.dat", 'r') as file:
 # Plotting cp
 legend_list = []
 cp_fig, cp_ax = plt.subplots(1, 1)
-for i in range(0, len(filenames)):
+for i in range(len(filenames)):
     cp_ax.plot(x_arrays[i], cp_arrays[i])
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
@@ -124,7 +124,7 @@ cp_ax.legend(legend_list, loc='upper right')
 # Plotting ue
 legend_list_ue = []
 ue_fig, ue_ax = plt.subplots(1, 1)
-for i in range(0, len(filenames)):
+for i in range(len(filenames)):
     ue_ax.plot(x_arrays[i], ue_arrays[i])
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
@@ -145,7 +145,7 @@ cl_ax.set_xlabel('$\\alpha$ [°]')
 cl_ax.set_title("$C_L$ vs $\\alpha$")
 
 # Plotting streamlines
-for i in range(0, len(filenames_psi)):
+for i in range(len(filenames_psi)):
     psi_fig, psi_ax = plt.subplots(1, 1)
     cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i])
     psi_ax.plot(x_arrays[i], y_arrays[i], color='red') # Assuming cp and psi files are the same airfoil
@@ -159,7 +159,7 @@ for i in range(0, len(filenames_psi)):
 # Plotting u_x
 legend_list_ux = []
 ux_fig, ux_ax = plt.subplots(1, 1)
-for i in range(0, len(filenames_uxuy)):
+for i in range(len(filenames_uxuy)):
     ux_ax.plot(y_arrays_uxuy[i], ux_arrays[i])
     legend_list.append(f"$\\alpha$ = {alphas[i]}°")
 
