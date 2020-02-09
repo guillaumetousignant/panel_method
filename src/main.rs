@@ -312,10 +312,10 @@ fn calculate_psi(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD,
 
     for (i, x) in x_vec.iter().enumerate() {
         for (j, y) in y_vec.iter().enumerate() {
-            psi_mat[i*y_vec.len() + j] += cos_alpha*y + sin_alpha*x;
+            psi_mat[i*y_vec.len() + j] = cos_alpha*y - sin_alpha*x;
             for (k, q) in qs.iter().enumerate() {
-                psi_mat[i*y_vec.len() + j] += q * 0.5/std::f64::consts::PI * (y - bod.y_mid[k]).atan2(x - bod.x_mid[k]) 
-                                            - gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // No type deduction for pow??
+                psi_mat[i*y_vec.len() + j] -= q * 0.5/std::f64::consts::PI * y / ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2))
+                                            + gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // No type deduction for pow??
             }
         }
     }
