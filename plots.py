@@ -147,7 +147,7 @@ cl_ax.set_title("$C_L$ vs $\\alpha$")
 # Plotting streamlines
 for i in range(len(filenames_psi)):
     psi_fig, psi_ax = plt.subplots(1, 1)
-    cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i])
+    cp = psi_ax.contourf(x_arrays_psi[i], y_arrays_psi[i], psi_arrays[i], 100)
     psi_ax.plot(x_arrays[i], y_arrays[i], color='red') # Assuming cp and psi files are the same airfoil
 
     psi_fig.colorbar(cp) # Add a colorbar to a plot
