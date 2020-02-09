@@ -19,10 +19,10 @@ fn main() {
     let psi_params = PLOTPARAMS {
         res_x: 120,
         res_y: 80,
-        origin_x: -1.0,
-        origin_y: -1.0,
-        span_x: 3.0,
-        span_y: 2.0,
+        origin_x: -11.0,
+        origin_y: -11.0,
+        span_x: 23.0,
+        span_y: 22.0,
     };
 
     let uxuy_params = PLOTPARAMS {
