@@ -7,6 +7,7 @@ import numpy as np
 import os
 import re
 
+# Init
 alphas = []
 x_arrays = []
 y_arrays = []

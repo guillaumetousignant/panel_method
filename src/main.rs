@@ -34,6 +34,7 @@ fn main() {
         span_y: 2.0,
     };
 
+    // Can run multiple airfoils in batch
     for filename in &filenames {
         let now = Instant::now();    
         println!("Input file is  {}", filename);    
@@ -64,6 +65,7 @@ fn main() {
     write_cl_alpha(&cl_alpha);
 }
 
+// Airfoil geometry
 struct BOD {
     ndtot: usize,
     x: Vec<f64>,
@@ -75,23 +77,27 @@ struct BOD {
     sinthe: Vec<f64>,
 }
 
+// Sources and vortices strengths
 struct COF {
-    a: Vec<f64>,
-    b: Vec<f64>,
+    a: Vec<f64>, // Big influence matrix
+    b: Vec<f64>, // Starts as B, but is x (source strengths and vortex strength) after gauss
     n: usize,
 }
 
+// Results along airfoil
 struct CPD {
     ue: Vec<f64>,
     cp: Vec<f64>,
 }
 
+// calar results
 struct CLALPHA {
     alpha: f64,
     cl: f64,
     cm: f64,
 }
 
+// c/4 cut
 struct UXUY {
     x: f64,
     y: Vec<f64>,
@@ -99,12 +105,14 @@ struct UXUY {
     u_y: Vec<f64>,
 }
 
+// Streamline displayer
 struct PSI {
     x: Vec<f64>,
     y: Vec<f64>,
     psi: Vec<f64>,
 }
 
+// To adjust plots from one plkace
 struct PLOTPARAMS {
     res_x: usize,
     res_y: usize,
@@ -114,6 +122,7 @@ struct PLOTPARAMS {
     span_y: f64,
 }
 
+// Reads the input airfoil files and fills the geometry structure
 fn read_file(filename: &String) -> BOD {
     let data = match fs::read_to_string(&filename) {
         Err(why) => panic!("Couldn't open {}: {}", filename, why.description()),
@@ -174,10 +183,13 @@ fn read_file(filename: &String) -> BOD {
         }
 }
 
+// This function fills the A and B matrices 
 fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF {
     let n = bod.ndtot + 1;
     let mut a = vec![0.; n*n];
     let mut bv = vec![0.; n];
+
+    // Last row
     for j in 0..n {
         a[(n-1)*n + j] = 0.;
     }
@@ -221,6 +233,7 @@ fn coef(sin_alpha: f64, cos_alpha: f64, bod: &BOD) -> COF {
 fn gauss(m: usize, cof: &mut COF) {
     let n = cof.n;
 
+    // This makes A an upper triangular matrix
     for k in 0..n-1 {
         let kp = k + 1;
         for i in kp..n {
@@ -234,7 +247,7 @@ fn gauss(m: usize, cof: &mut COF) {
         }
     }
 
-
+    // This goes back up A and solves for x, but stores it in b
     for k in 0..m {
         cof.b[(n-1)*m + k] /= cof.a[(n-1)*n + n-1];
         for i in (0..n-1).rev() {
@@ -247,6 +260,7 @@ fn gauss(m: usize, cof: &mut COF) {
     }
 }
 
+// This calculates V_t and C_p along the airfoil from the vortices and sources. 
 fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let q = &cof.b[0..bod.ndtot];
     let gamma = cof.b[cof.n-1];
@@ -254,7 +268,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     let mut ue = vec![0.; bod.ndtot];
 
     for i in 0..bod.ndtot {
-        let mut v_tan = cos_alpha*bod.costhe[i] + sin_alpha*bod.sinthe[i];
+        let mut v_tan = cos_alpha*bod.costhe[i] + sin_alpha*bod.sinthe[i]; // Uniform flow
         for j in 0..bod.ndtot {
             let (flog, ftan) = match j == i {
                 true => (0., std::f64::consts::PI),
@@ -284,6 +298,7 @@ fn vpdis(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cof: &COF) -> CPD {
     }
 }
 
+// Calculates C_M by multiplying pressure and arm lever, then C_L
 fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     let mut cfx = 0.;
     let mut cfy = 0.;
@@ -302,8 +317,9 @@ fn clcm(sin_alpha: f64, cos_alpha: f64, bod: &BOD, cpd: &CPD) -> (f64, f64) {
     (cl, cm)
 }
 
+// This is *supposed* to evaluate psi on a grid from the three elementary flows, but it doesn't work.
 fn calculate_psi(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD, cof: &COF) -> PSI {
-    let x_vec: Vec<f64> = (0..params.res_x).map(|x| params.origin_x + params.span_x * (x as f64)/(params.res_x as f64)).collect();
+    let x_vec: Vec<f64> = (0..params.res_x).map(|x| params.origin_x + params.span_x * (x as f64)/(params.res_x as f64)).collect(); // No linspace it seems
     let y_vec: Vec<f64> = (0..params.res_y).map(|y| params.origin_y + params.span_y * (y as f64)/(params.res_y as f64)).collect();
     
     let qs = &cof.b[0..bod.ndtot];
@@ -312,10 +328,10 @@ fn calculate_psi(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD,
 
     for (i, x) in x_vec.iter().enumerate() {
         for (j, y) in y_vec.iter().enumerate() {
-            psi_mat[i*y_vec.len() + j] = cos_alpha*y - sin_alpha*x;
+            psi_mat[i*y_vec.len() + j] = cos_alpha*y - sin_alpha*x; // Uniform flow
             for (k, q) in qs.iter().enumerate() {
-                psi_mat[i*y_vec.len() + j] -= q * 0.5/std::f64::consts::PI * y / ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2))
-                                            + gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // No type deduction for pow??
+                psi_mat[i*y_vec.len() + j] -= q * 0.5/std::f64::consts::PI * y / ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)) /* Doublet */
+                                            + gamma * 0.5/std::f64::consts::PI * ((x - bod.x_mid[k]).powi(2) + (y - bod.y_mid[k]).powi(2)).sqrt().ln(); // Vortex
             }
         }
     }
@@ -327,6 +343,7 @@ fn calculate_psi(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD,
     }
 }
 
+// Basically the same as vpdis, but calculates away from the airfoil.
 fn velocity_slice(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD, cof: &COF) -> UXUY {
     let y_vec: Vec<f64> = (0..params.res_y).map(|y| params.origin_y + params.span_y * (y as f64)/(params.res_y as f64)).collect();
 
@@ -364,6 +381,7 @@ fn velocity_slice(sin_alpha: f64, cos_alpha: f64, params: &PLOTPARAMS, bod: &BOD
     }
 }
 
+// Why is it so complicated to get user input
 fn get_input(prompt: &str) -> String{
     println!("{}",prompt);
     let mut input = String::new();
@@ -374,6 +392,7 @@ fn get_input(prompt: &str) -> String{
     input.trim().to_string()
 }
 
+// Outputs the results like the FORTRAN version
 fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
     println!("\n SOLUTION AT ALPHA = {:>10.5}\n", bod.alpha);
     println!("    j    X(j)      Y(j)      CP(j)      UE(j)\n");
@@ -392,6 +411,7 @@ fn print(bod: &BOD, cpd: &CPD, cl: f64, cm: f64) {
             CM = cm);
 }
 
+// Ouptuts C_p and U_e to a file for the python part of the code
 fn write_cp(bod: &BOD, cpd: &CPD) {
     let mut lines: Vec<String> = Vec::with_capacity(bod.ndtot+1);
 
@@ -411,6 +431,7 @@ ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, bod.ndt
     writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to cp output file.");
 }
 
+// Ouptuts psi to a file for the python part of the code
 fn write_psi(bod: &BOD, psi: &PSI) {
     let mut lines: Vec<String> = Vec::with_capacity(psi.psi.len()+1);
 
@@ -431,6 +452,7 @@ ZONE T= \"Zone     1\",  I= {},  J= {},  DATAPACKING = POINT", bod.alpha, psi.x.
     writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to psi output file.");
 }
 
+// Ouptuts a velocity slice to a file for the python part of the code
 fn write_uxuy(bod: &BOD, uxuy: &UXUY) {
     let mut lines: Vec<String> = Vec::with_capacity(uxuy.y.len()+1);
 
@@ -450,6 +472,7 @@ ZONE T= \"Zone     1\",  I= {},  J= 1,  DATAPACKING = POINT", bod.alpha, uxuy.y.
     writeln!(file, "{}", lines.join("\n")).expect("Error, unable to write to uxuy output file.");
 }
 
+// Ouptuts the C_L vs alpha curve to a file for the python part of the code
 fn write_cl_alpha(cl_alpha: &Vec<CLALPHA>) {
     let mut lines: Vec<String> = Vec::with_capacity(cl_alpha.len()+1);
 
